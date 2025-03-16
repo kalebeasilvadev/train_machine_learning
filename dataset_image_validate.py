@@ -65,7 +65,7 @@ def process_image(image_path, target_size=(150, 150)):
 # Processo principal
 def main():
     # Caminho para o diretório com datasets
-    image_directory = "./content/validate"  # Ajuste para seu caminho de entrada
+    image_directory = "./content/train"  # Ajuste para seu caminho de entrada
 
     # Carrega imagens válidas e organiza por classe
     class_images = load_and_group_by_class(image_directory)
