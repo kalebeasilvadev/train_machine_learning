@@ -1,122 +1,175 @@
-# **Documentação do Notebook `retreinamento.ipynb`**
+# Documentação do Projeto: Treinamento e Re-treinamento de Modelo de Machine Learning
 
-## **Objetivo**
-Este notebook é usado para treinar e ajustar um modelo de classificação de imagens, focado na distinção entre duas classes: cães e gatos. Para isso, utilizamos a biblioteca TensorFlow/Keras para carregar, treinar, ajustar e avaliar o modelo.
-
----
-
-## **Sumário**
-
-1. **Bibliotecas utilizadas**  
-   Importação de pacotes essenciais para o processamento de imagens, construção de modelos, treinamento e avaliação.  
-   Principais pacotes:
-   - TensorFlow/Keras (modelos e pré-processamento)
-   - Scikit-learn (métricas)
-   - Matplotlib e Seaborn (visualização)
-   - Numpy (manipulação numérica)
-
-2. **Carregamento do Modelo Pré-treinado**  
-   - Uso de uma camada customizada `CustomDepthwiseConv2D`, necessária para resolver problemas relativos ao parâmetro `groups`.
-   - Carregamento de um modelo salvo no formato Keras H5.
-   - Compilação inicial utilizando `Adam` otimizado para classificação binária.
-
-3. **Configuração dos Geradores de Dados**  
-   - Caminhos de pastas para **treinamento**, **validação** e **teste**.
-   - Aplicação de técnicas de *data augmentation* no conjunto de treinamento:
-      - Rotação de imagens
-      - Deslocamento horizontal/vertical
-      - Espelhamento horizontal
-   - Sem *data augmentation* para os conjuntos de validação e teste.
-
-4. **Ajuste Fino (Fine-Tuning)**  
-   - Congelamento de todas as camadas do modelo.
-   - Descongelamento das últimas 5 camadas para ajuste mais profundo.
-   - Recompilação do modelo com um *learning rate* menor (1e-5).
-   - Uso de callbacks, como `EarlyStopping`, `ReduceLROnPlateau` e `ModelCheckpoint`.
-
-5. **Treinamento do Modelo**  
-   - Configuração de 10 épocas ajustáveis.
-   - Treinamento utilizando os geradores e callbacks configurados.
-   - Visualização das curvas de aprendizado do modelo:
-      - Curva de acurácia
-      - Curva de perda (loss)
-
-6. **Avaliação do Modelo**  
-   - Avaliação no conjunto de teste para obter métricas como:
-      - Acurácia
-      - Matriz de confusão (visualizada com heatmap)
-      - Relatório de classificação (precisão, recall, F1-score)
-   - Visualização das previsões com gráficos de dispersão (scatter plot).
-
-7. **Previsão em Imagem Individual**  
-   - Função para prever a classe de uma única imagem.
-   - Predição em lote com visualização gráfica dos resultados.
+Este repositório contém um projeto de **Aprendizado de Máquina** que ilustra o fluxo completo de criação, exportação, aprimoramento e validação de um modelo treinado inicialmente no [Teachable Machine](https://teachablemachine.withgoogle.com/). O arquivo principal do repositório é o **`retreinamento.ipynb`**, responsável por carregar o modelo exportado e realizar ajustes de hiperparâmetros, validação com novos dados e análise de métricas.
 
 ---
 
-## **Funcionamento em Detalhes**
+## 1. Visão Geral do Projeto
 
-### **1. Carregamento do Modelo**
-O modelo carregado foi previamente salvo em `./content/model.h5`. É recompilado utilizando:
-- **Funções perda:** `binary_crossentropy`
-- **Métrica:** `accuracy`
-- **Otimização inicial:** Taxa de aprendizado padrão com `adam`.
+1. **Treinamento Inicial no Teachable Machine**  
+   - Foi criado um modelo para classificar pelo menos duas categorias (imagens, áudio ou poses, dependendo do escopo escolhido).  
+   - Após obter resultados satisfatórios, o modelo foi exportado para uso fora do Teachable Machine (em TensorFlow, Keras ou outro formato compatível).
 
-### **2. Configuração dos Dados**
-Os dados são estruturados em três conjuntos:
-- **Treinamento:** Especificado para aumentar a robustez do modelo com *data augmentation*.
-- **Validação/Teste:** Realizado sem aumento de dados, apenas com normalização.
+2. **Repositório e Arquivos Principais**  
+   - **`retreinamento.ipynb`**: Notebook em Python (Google Colab / Jupyter) que carrega o modelo exportado e realiza o re-treinamento e teste.  
+   - *Possíveis pastas auxiliares*:
+     - `models/`: Contém arquivos do modelo exportado (caso existam `.h5`, `.json`, `.pb` ou outros relacionados).  
+     - `data/`: Conjunto de dados adicionais para testes ou re-treinamento (se necessário).  
+     - `images/`: Imagens de suporte ou documentação.
 
-Dimensões da imagem de entrada: **224 x 224**  
-Classes trabalhadas: **cães**, **gatos**  
-
-### **3. Ajuste Fino e Treinamento**
-Durante o fine-tuning:
-- Apenas as últimas camadas foram ajustadas com um *learning rate* reduzido.
-- Uso de três callbacks para melhorar o treinamento:
-   1. **`EarlyStopping`:** Parar caso a validação não melhore após 5 épocas.
-   2. **`ReduceLROnPlateau`:** Reduzir o LR em 50% caso a acurácia da validação não melhore em 3 épocas.
-   3. **`ModelCheckpoint`:** Salvamento do melhor modelo no arquivo `fine_tuned_model.h5`.
-
-O treinamento é realizado em **10 épocas** (ajustável).
-
-### **4. Resultados e Avaliação**
-Após o treinamento, o modelo é avaliado no conjunto de teste.  
-As métricas incluem:
-- **Acurácia no teste**
-- **Matriz de Confusão**  
-  Mostrada como um gráfico de calor para comparação das previsões corretas e incorretas.  
-- **Relatório de Classificação:**  
-  Inclui:
-  - Precisão (Precision)  
-  - Recall  
-  - F1-Score  
-  - Suporte (quantidade de exemplos por classe)  
-- **Scatter Plot:** Visualização das previsões com dispersão utilizando `true_classes` e `predicted_classes`.
-
-### **5. Função para Previsão Individual**
-Uma função personalizada permite prever a classe de imagens únicas.  
-Etapas do processo:
-1. Carregamento da imagem.
-2. Redimensionamento para **224x224** e normalização.
-3. Previsão utilizando o modelo.
-4. Retorno da classe como `Cachorro` ou `Gato`.
-
-A funcionalidade também inclui previsão por lote, exibindo imagens e suas classes em uma grade.
+3. **Motivação**  
+   - Demonstrar como iniciar um projeto de **Machine Learning** de forma simples com o Teachable Machine.  
+   - Aprender a exportar e, em seguida, melhorar o modelo em um ambiente de desenvolvimento Python (Google Colab / Jupyter Notebook), ajustando hiperparâmetros, testando novas amostras e computando métricas de avaliação.
 
 ---
 
-## **Saídas do Notebook**
-1. Treinamento do modelo com métricas claras sobre desempenho.
-2. Visualização detalhada do processo de ajuste fino e validação.
-3. Capacidade de prever imagens individuais, o que é útil em cenários do mundo real.
-4. Visualizações e relatórios completos (curvas de aprendizado, matrizes de confusão, gráficos dispersos).
+## 2. Estrutura do Repositório
+
+```
+train_machine_learning/
+├── models/
+│   ├── <arquivos_modelo_exportado>.h5
+│   ├── ...
+├── data/
+│   ├── <arquivos_de_dados_para_teste_ou_treinamento>
+│   ├── ...
+├── images/
+│   ├── <imagens_de_documentação>
+│   ├── ...
+├── retreinamento.ipynb
+├── README.md (este arquivo de documentação)
+└── ...
+```
+
+- **`retreinamento.ipynb`**: Contém o passo a passo para carregar o modelo, re-treiná-lo e avaliá-lo.
+- **`models/`**: Possível local onde estão armazenados os arquivos gerados pelo Teachable Machine ou treinamentos anteriores.
+- **`data/`**: Onde podem estar armazenados dados (imagens, CSVs, etc.) para testes adicionais ou retraining.
 
 ---
 
-## **Pontos de Melhorias**
-- Incluir mais classes para ampliar a capacidade do modelo.
-- Ajustar os hiperparâmetros (e.g., taxa de aprendizado, arquitetura).
-- Implementar validação cruzada para avaliar a variação do treinamento.
+## 3. Como Executar o Projeto
 
-Essa documentação organiza os principais componentes do notebook, tornando-o mais compreensível e acessível a novos usuários. Em que mais posso ajudar? 😊
+1. **Clonar o Repositório**
+
+   ```bash
+   git clone https://github.com/kalebeasilvadev/train_machine_learning.git
+   cd train_machine_learning
+   ```
+
+2. **Instalar Dependências (opcional)**  
+   Se estiver executando localmente (fora do Google Colab), crie um ambiente virtual e instale as dependências necessárias. Caso use Google Colab, basta garantir que as bibliotecas principais estejam instaladas no notebook.
+
+   ```bash
+   # Exemplo de criação de ambiente virtual e instalação de pacotes
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   # ou venv\Scripts\activate  # Windows
+
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+
+   *Observação:* Pode ser que o arquivo `requirements.txt` não esteja disponível em seu repositório. Nesse caso, instale manualmente as bibliotecas que aparecem no notebook (ex.: TensorFlow, Scikit-Learn, etc.).
+
+3. **Abrir o Notebook `retreinamento.ipynb`**  
+   - No Google Colab, basta fazer o upload deste notebook ou usar a opção “Open in Colab” se disponível.
+   - Localmente, abra o Jupyter Notebook/ JupyterLab:
+     ```bash
+     jupyter notebook retreinamento.ipynb
+     ```
+
+4. **Executar as Células Passo a Passo**  
+   - Siga as instruções dentro do notebook para:
+     1. Carregar o modelo exportado do Teachable Machine.
+     2. Realizar o re-treinamento ou ajuste de hiperparâmetros.
+     3. Testar o modelo em dados adicionais.
+     4. Gerar as métricas de avaliação (acurácia, matriz de confusão, recall, etc.).
+
+---
+
+## 4. Explicação Resumida do `retreinamento.ipynb`
+
+O notebook **`retreinamento.ipynb`** foi estruturado para contemplar as seguintes etapas:
+
+1. **Importação de Bibliotecas**  
+   Bibliotecas como TensorFlow, Keras, NumPy, Pandas e Scikit-Learn são importadas.
+
+2. **Carregamento do Modelo**  
+   - O modelo, previamente treinado no Teachable Machine, é carregado (em formato `.h5`, `.json` + pesos ou outro padrão).  
+   - É verificado se o modelo foi importado corretamente.
+
+3. **Pré-processamento dos Dados**  
+   - Conversão de imagens em tensores (no caso de classificação de imagens).  
+   - Normalização ou padronização de dados, se necessário.  
+
+4. **Re-treinamento/Ajuste**  
+   - Ajuste de hiperparâmetros (por exemplo, taxa de aprendizado, camadas adicionais, epochs, batch size, etc.).  
+   - Treinamento em novos dados ou re-treinamento com uma fração dos dados originais para refinar o modelo.
+
+5. **Validação e Testes**  
+   - Criação da matriz de confusão para análise de como o modelo classifica cada categoria.  
+   - Cálculo de métricas como **acurácia**, **precisão**, **recall**, **F1-Score**, entre outras.
+
+6. **Conclusões e Próximos Passos**  
+   - Análise dos resultados obtidos.  
+   - Sugestões de melhorias ou de dados adicionais para melhor performance.
+
+---
+
+## 5. Principais Métricas
+
+Durante o re-treinamento, as métricas utilizadas para avaliar o desempenho do modelo incluem:
+
+- **Acurácia (accuracy)**: Percentual de acertos do modelo em relação ao total de previsões.
+- **Precisão (precision)**: Habilidade do modelo em não classificar positivamente amostras que são negativas.
+- **Recall**: Capacidade de identificar corretamente as amostras positivas.
+- **Matriz de Confusão (confusion matrix)**: Mostra os acertos e erros de forma tabular para cada classe, permitindo análise aprofundada de onde o modelo pode falhar.
+
+Essas métricas podem ser vistas nos *outputs* do notebook, geralmente representadas em forma de texto (scores numéricos) e, quando possível, em gráficos (matriz de confusão).
+
+---
+
+## 6. Resultados e Discussões
+
+- **Resultados Obtidos**  
+  Explique no seu relatório ou aqui no README quais foram os principais valores de acurácia e demais métricas após o re-treinamento. Exemplifique:
+
+  > *Exemplo:* “O modelo atingiu **92%** de acurácia e apresentou um **recall** de **90%**, o que indica boa capacidade de detecção das classes propostas.”
+
+- **Possíveis Melhorias**  
+  - Aumentar o conjunto de dados (mais imagens ou samples de áudio).
+  - Realizar técnicas de aumento de dados (data augmentation).
+  - Ajustar parâmetros da rede, como número de camadas, número de neurônios e taxa de dropout.
+  - Otimizar a taxa de aprendizado (learning rate) ou testar diferentes otimizadores (Adam, SGD, RMSprop etc.).
+
+---
+
+## 7. Considerações Finais
+
+Este projeto demonstra, de forma simplificada, todo o processo de:
+1. **Treinamento de um modelo em uma ferramenta de fácil acesso** (Teachable Machine).  
+2. **Exportação** do modelo para um formato compatível com bibliotecas de Machine Learning.  
+3. **Re-treinamento e validação** com dados adicionais ou ajustes de hiperparâmetros, utilizando bibliotecas avançadas como TensorFlow e Scikit-Learn.
+
+A proposta atende aos critérios básicos de um workflow de **Machine Learning supervisionado**, que vão desde a coleta de dados até a análise de métricas. Sinta-se à vontade para contribuir com sugestões, melhorias ou abrir **Issues** neste repositório.
+
+---
+
+## 8. Referências
+
+- [Teachable Machine](https://teachablemachine.withgoogle.com/)  
+- [Documentação do TensorFlow](https://www.tensorflow.org/?hl=pt-br)  
+- [Documentação do Keras](https://keras.io/)  
+- [Scikit-Learn: Machine Learning em Python](https://scikit-learn.org/stable/)  
+
+---
+
+### Autor
+
+- [Kalebe Andrade Silva](https://github.com/kalebeasilvadev)
+
+Caso tenha dúvidas ou deseje colaborar, abra uma **Issue** ou envie um **Pull Request**. Agradecemos o seu interesse! 
+
+--- 
+
+<sup>© 2025 - Projeto de Aprendizado de Máquina - Todos os direitos reservados.</sup>
